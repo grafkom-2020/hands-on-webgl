@@ -2,7 +2,10 @@ function main() {
     var canvas = document.getElementById("canvas_main"), gl = canvas.getContext("webgl");
 
     var vertices = [
-        -0.5, 0.5, 0.0, -0.10, -0.5, 0.0, 0.5, -0.5, 0.0,0.5, -0.10, 0.0, 
+        -0.5, 0.5, 0.0,             // A
+        -0.1, -0.5, 0.0,           // B
+        0.5, -0.5, 0.0,             // C
+        0.5, -0.1, 0.0,            // D
     ];
     var vertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -22,7 +25,7 @@ function main() {
     
     var fragmentShaderCode =
         'void main(void) {' +
-            'gl_FragColor = vec4(0.0, 0.0, 0.0, 0.1);' +
+            'gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);' +
         '}';
 
     var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -43,5 +46,5 @@ function main() {
     gl.clearColor(0.35, 0.35, 0.94, 0.9);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.drawArrays(gl.LINE_LOOP, 0, 4);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 }
