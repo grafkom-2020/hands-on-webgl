@@ -51,7 +51,7 @@ function main() {
         'varying vec3 vColor;' +
         'void main(void) {' +
             'vColor = aColor;' +
-            'gl_Position = vec4(aPosition, 1.0);' +
+            'gl_Position = vec4(aPosition.xy, aPosition.z - 1.0, 1.0);' +   // digeser 1 satuan menjauh
         '}';
 
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
@@ -83,8 +83,9 @@ function main() {
     gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(color);
 
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.drawArrays(gl.TRIANGLES, 0, 36);
 }
