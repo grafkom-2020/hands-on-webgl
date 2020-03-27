@@ -17,8 +17,7 @@ var cubePoints = [
  ];
 ```
 
-![https://i.pinimg.com/originals/f9/51/cf/f951cfd3baaf74282dfb67ae5a810f8f.gif]
-(https://i.pinimg.com/originals/f9/51/cf/f951cfd3baaf74282dfb67ae5a810f8f.gif)
+![https://i.pinimg.com/originals/f9/51/cf/f951cfd3baaf74282dfb67ae5a810f8f.gif](https://i.pinimg.com/originals/f9/51/cf/f951cfd3baaf74282dfb67ae5a810f8f.gif)
 
 Warna-warna yang akan kita aplikasikan pada kubus kali ini akan kita sesuaikan dengan warna kubus yang sering kita lihat dari kubus rubik, yakni: merah, hijau, biru, putih, oranye, dan kuning. Definisi warna pada JavaScript cukup disematkan pada indeks 1-6 (indeks 0 dan 7 sengaja kita kosongkan). Alasannya akan dijelaskan pada paragraf berikutnya.
 
