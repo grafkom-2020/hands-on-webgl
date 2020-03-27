@@ -1,228 +1,99 @@
-# Hands-on 2
+# Hands-on 3
 
-## Shader
+## Proses di CPU (JavaScript)
 
-Shader merupakan program yang didesain untuk di-run pada graphics processor, secara paralel. Shader ditulis menggunakan OpenGL ES Shader Language (GLSL). Untuk bisa bekerja, WebGL membutuhkan 2 shader setiap kali kita draw sesuatu pada canvas, yaitu *fragment shader* dan *vertex shader.* Setiap shader ini merupakan sebuah function/method. Kedua shader ini akan saling berhubungan menjadi sebuah program/shader program. Pada sebuah project/aplikasi WebGL, shader program lebih dari satu terkadang dibutuhkan.
+Kita sekarang berpindah dari pembuatan obyek 2D (segitiga di hands-on 2) ke pembuatan obyek 3D, dalam hal ini adalah obyek kubus. Untuk dapat membuat sebuah kubus, kita membutuhkan definisi posisi dari titik-titik sudut kubus berikut dengan warna masing-masing sisinya. Ada 8 titik sudut kubus yang perlu kita definisikan posisinya di aplikasi JavaScript. Kita akan buat kubus ini berukuran 1 unit baik dari segi lebar, tinggi, dan panjangnya.
 
-### Vertex Shader
-
-![https://webglfundamentals.org/webgl/lessons/resources/vertex-shader-anim.gif](https://webglfundamentals.org/webgl/lessons/resources/vertex-shader-anim.gif)
-
-Vertex shader merupakan sebuah fungsi yang dipanggil pada setiap vertex. Vertex shader mengontrol data pada setiap vertex (per-vertex data) seperti koordinat, warna, dan texture pada koordinat tersebut. Selain itu vertex shader juga mengatur transformasi vertex, seperti merubah koordinat vertex, normalisasi, transformasi texture koordinat, lighting, dan color material.
-Sample code vertex shader:
-
-```GLSL
-//attribute merupakan qualifier yang menghubungkan antara vertex shader dan per-vertex data
-//value ini selalu beruba setiap eksekusi vertex shader
-attribute vec2 coordinates;
-
-void main(void) {
-    gl_Position = vec4(coordinates, 0.0, 1.0);
-};
+```JavaScript
+var cubePoints = [
+     [-0.5,  0.5,  0.5],   // A, 0
+     [-0.5, -0.5,  0.5],   // B, 1
+     [ 0.5, -0.5,  0.5],   // C, 2 
+     [ 0.5,  0.5,  0.5],   // D, 3
+     [-0.5,  0.5, -0.5],   // E, 4
+     [-0.5, -0.5, -0.5],   // F, 5
+     [ 0.5, -0.5, -0.5],   // G, 6
+     [ 0.5,  0.5, -0.5]    // H, 7 
+ ];
 ```
 
-Pada sample di atas, kita mendeklarasikan sebuah attribute variable bernama `coordinates`. Variable ini akan diasosiakan (dihubungkan) dengan *Vertex Buffer Object* menggunakan method `getAttribLocation()`. 
+![https://i.pinimg.com/originals/f9/51/cf/f951cfd3baaf74282dfb67ae5a810f8f.gif]
+(https://i.pinimg.com/originals/f9/51/cf/f951cfd3baaf74282dfb67ae5a810f8f.gif)
 
-`gl_Position` merupakan variable yang sudah predefined yang hanya ada di vertex shader. Variablee ini yang berisi posisi dari vertex. Pada sample diatas, attribute variable `coordinates` dipassing dalam bentuk vector. 
+Warna-warna yang akan kita aplikasikan pada kubus kali ini akan kita sesuaikan dengan warna kubus yang sering kita lihat dari kubus rubik, yakni: merah, hijau, biru, putih, oranye, dan kuning. Definisi warna pada JavaScript cukup disematkan pada indeks 1-6 (indeks 0 dan 7 sengaja kita kosongkan). Alasannya akan dijelaskan pada paragraf berikutnya.
 
-### Fragment Shader
+```JavaScript
+var cubeColors = [
+     [],
+     [1.0, 0.0, 0.0],    // merah
+     [0.0, 1.0, 0.0],    // hijau
+     [0.0, 0.0, 1.0],    // biru
+     [1.0, 1.0, 1.0],    // putih
+     [1.0, 0.5, 0.0],    // oranye
+     [1.0, 1.0, 0.0],    // kuning
+     []
+ ];
+```
 
-![https://gsculerlor.s-ul.eu/MRoljygw](https://gsculerlor.s-ul.eu/MRoljygw)
+Agar keenam sisi kubus bisa mendapatkan warna yang berbeda-beda, maka satu titik sudut kubus tidak cukup hanya didefinisikan sebagai sebuah verteks. Alih-alih, kita membutuhkan 3 definisi verteks terpisah untuk satu buah titik sudut agar dari satu titik sudut ini bisa mengakomodasi tiga sisi dengan warna yang berbeda untuk masing-masingnya. Untuk membantu proses pendefinisian verteks ini kita akan membuat fungsi `quad`. Fungsi ini akan mengolah kedelapan titik sudut untuk didistribusikan sebagai 36 buah verteks (dalam array `vertices`) yang akan memuat atribut posisi `cubePoints` dan warna `cubeColors`. Fungsi ini akan dipanggil 6 kali, yakni sebanyak jumlah sisi kubus.
 
-Sebuah mesh terbuat dari beberapa triangles, dan permukaan dari tiap triangle ini yang disebut dengan fragment. Fragment shader sendiri merupakan sebuah fungsi yang dipanggil pada setiap fragment. Fragment shader akan mengatur dan mengkalkulasi warna pada setiap pixelnya. Fragment shader dapat melakukan operasi pada interpolated value, texture, fog, dan color summing.
-Sample code fragment shader:
+```JavaScript
+function quad(a, b, c, d) {
+     var indices = [a, b, c, c, d, a];
+     for (var i=0; i<indices.length; i++) {
+         for (var j=0; j<3; j++) {
+             vertices.push(cubePoints[indices[i]][j]);
+         }
+         for (var j=0; j<3; j++) {
+             vertices.push(cubeColors[a][j]);
+         }
+     }
+ }
+ quad(1, 2, 3, 0); // Kubus depan
+ quad(2, 6, 7, 3); // Kubus kanan
+ quad(3, 7, 4, 0); // Kubus atas
+ quad(4, 5, 1, 0); // Kubus kiri
+ quad(5, 4, 7, 6); // Kubus belakang
+ quad(6, 2, 1, 5); // Kubus bawah
+```
+
+Jangan lupa sebagai langkah akhir (di bagian proses di CPU) untuk menyambungkan variabel warna di JavaScript dengan variabel warna di _shader_ agar _pointer_ terhadap _vertex buffer object_ tereksekusi dengan tepat.
+
+```JavaScript
+var color = gl.getAttribLocation(shaderProgram, "aColor");
+gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+gl.enableVertexAttribArray(color);
+```
+
+Untuk proses penggambaran verteks-nya, kita akan menggunakan `gl.TRIANGLES` dengan jumlah verteks total sebanyak 36.
+
+```JavaScript
+gl.drawArrays(gl.TRIANGLES, 0, 36);
+```
+
+## Proses di GPU (Shader)
+### Vertex Shader
+
+Oleh karena kita perlu menambahkan atribut warna ke dalam verteks, maka kita perlu menambahkan variabel baru di _shader_ untuk mengakomodasi ini. Pada awalnya, variabel `aColor` dibuat dengan _qualifier `attribute`_ yang berarti akan menangkap nilai dari CPU (JavaScript) untuk kemudian ditransfer ke _fragment shader_ melalui variabel `vColor` yang dibuat dengan _qualifier `varying`_. Variabel **warna** ini bertipedatakan `vec3`sebagaimana variabel posisi. Hanya saja 3 elemen yang dicakup bukan ~xyz~ tapi **rgb**.
 
 ```GLSL
+attribute vec3 aPosition;
+attribute vec3 aColor;
+varying vec3 vColor;
 void main(void) {
-    gl_FragColor = vec4(0, 0.8, 0, 1);
+    vColor = aColor;
+    gl_Position = vec4(aPosition, 1.0);
 }
 ```
 
-Pada sample di atas, value dari color disimpan pada variable `gl_FragColor`. `gl_FragColor` merupakan variable predefined pada fragment shader yang membawa output data berupa color value dari pixel.
+### Fragment Shader
 
-### Implementasi shader pada WebGL
+Variabel `vColor` yang dideklarasikan di _vertex shader_ akan ditangkap oleh variabel `vColor` (juga `varying`) yang ada di _fragment shader_. Pada akhirnya, `vColor` akan menyusun 3 elemen awal dari `gl_FragColor`.
 
-Implementasi shader pada WebGL membutuhkan beberapa step:
-
-- Membuat shader object
-
-    Pada WebGL, terdapat method `createShader()` yang akan membuat shader object kosong.
-    Syntax:
-
-    ```GLSL
-    Object createShader (enum type)
-    //Enum type bisa berupa gl.VERTEX_SHADER atau gl.FRAGMENT_SHADER
-    ```
-
-- Attach source ke shader object
-
-    Source code shader kita perlu diattach ke shader object yang sudah kita buat sebelumnya menggunakan method `shaderSource()`
-    Syntax:
-
-    ```GLSL
-    void shaderSource(Object shader, string source)
-    ```
-
-- Compile shader
-
-    Setelah shader object attached dengan sourcenya, shader perlu di compile sebelum kita passing ke program kita menggunakan method `compileShader()`
-    Syntax:
-
-    ```GLSL
-    void compileShader(Object shader)
-    ```
-
-Contoh implementasi:
-
-```Javascript
-var vertCode =
-    'attribute vec2 coordinates;' +
-    
-    'void main(void) {' +
-        ' gl_Position = vec4(coordinates, 0.0, 1.0);' +
-    '}';
-
-var vertShader = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vertShader, vertCode);
-gl.compileShader(vertShader);
-    
-var fragCode =
-    'void main(void) {' +
-        ' gl_FragColor = vec4(0.0, 1.0, 1.0, 0.5);' +
-    '}';
-
-var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-gl.shaderSource(fragShader, fragCode);
-gl.compileShader(fragShader);
+```GLSL
+precision mediump float;
+varying vec3 vColor;
+void main(void) {
+    gl_FragColor = vec4(vColor, 1.0);
+}
 ```
-
-Setelah selesai membuat vertex shader dan fragment shader, kita perlu menggabungkan keduanya ke dalam sebuah program:
-
-- Membuat program object
-
-    Seperti biasa kita perlu membuat program object kosong, menggunakan method `createProgram()`
-    Syntax:
-
-    ```GLSL
-    WebGLProgram gl.createProgram();
-    ```
-
-- Attach shader ke program
-
-    Setelah memiliki object program kosong, kita perlu attach shader yang sudah dicompile sebelumnya ke dalam program kita menggunakan method `attachShader()`
-    Syntax:
-
-    ```GLSL
-    void gl.attachShader(program, shader);
-    ```
-
-- Link program
-
-    Linking program merupakan tahap akhir untuk linking antar program (shader progam dan program) menggunakan method `linkProgram()`
-    Syntax:
-
-    ```GLSL
-    void gl.linkProgram(program);
-    ```
-
-- Menggunakan program yang sudah dibuat
-
-    Kita perlu menspesifikkan program mana yang akan digunakan sebagai bagian dari rendering state menggunakan method `useProgram()`
-    Syntax:
-
-    ```GLSL
-    void gl.useProgram(program);
-    ```
-
-Contoh implementasi:
-
-```JavaScript
-var shaderProgram = gl.createProgram();
-gl.attachShader(shaderProgram, vertShader);
-gl.attachShader(shaderProgram, fragShader);
-gl.linkProgram(shaderProgram);
-gl.useProgram(shaderProgram);
-```
-
-## Drawing Points dan Triangles
-
-Define vertices sebagai coordinates dan simpan ke dalam buffer
-
-```JavaScript
-var vertices = [
-    -0.5,   0.5,  0.0,
-    -0.5,  -0.5,  0.0,
-    0.5,  -0.5,  0.0, 
-];
-
-var vertex_buffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-gl.bindBuffer(gl.ARRAY_BUFFER, null);
-```
-
-Membuat dan compile shaders dan WebGL program
-
-```JavaScript
-var vertCode =
-    'attribute vec3 coordinates;' +
-
-    'void main(void) {' +
-        'gl_Position = vec4(coordinates, 1.0);' +
-        'gl_PointSize = 10.0;'+
-    '}';
-
-var vertShader = gl.createShader(gl.VERTEX_SHADER);
-gl.shaderSource(vertShader, vertCode);
-gl.compileShader(vertShader);
-
-var fragCode =
-    'void main(void) {' +
-        ' gl_FragColor = vec4(0.0, 0.0, 0.0, 0.1);' +
-    '}';
-
-var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-gl.shaderSource(fragShader, fragCode);
-gl.compileShader(fragShader);
-
-var shaderProgram = gl.createProgram();
-gl.attachShader(shaderProgram, vertShader); 
-gl.attachShader(shaderProgram, fragShader);
-gl.linkProgram(shaderProgram);
-gl.useProgram(shaderProgram);
-```
-
-Associate shader dengan buffer object
-
-```JavaScript
-gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-
-var coord = gl.getAttribLocation(shaderProgram, "coordinates");
-gl.vertexAttribPointer(coord, 3, gl.FLOAT, false, 0, 0);
-gl.enableVertexAttribArray(coord);
-```
-
-Draw objects
-
-```JavaScript
-gl.drawArrays(gl.POINTS, 0, 3);
-```
-
-Untuk menggambar sebuah Triangles, yang perlu diubah adalah parameter yang dipassing kedalam fungsi `gl.drawArrays` atau `gl.drawElements`. Ada 7 jenis, yaitu `POINTS`, `LINES`, `LINE_STRIP`, `LINE_LOOP`, `TRIANGLES`, `TRIANGLE_STRIP`, dan `TRIANGLE_FAN`. Jadi untuk menggambar sebuah triangle dengan vertex yang sudah dibuat sebelumnya cukup dengan merubah line berikut.
-
-```JavaScript
-gl.drawArrays(gl.TRIANGLES, 0, 3);
-```
-
-Perlu diperhatikan juga bahwa kita juga bisa menghapus `gl_PointSize` yang kita gunakan sebelumnya karena yang dirender bukanlah points.
-
----
-
-### Referensi yang digunakan:
-- [Shader](https://www.khronos.org/opengl/wiki/Shader)
-- [WebGLShader](https://developer.mozilla.org/en-US/docs/Web/API/WebGLShader)
-- [WebGL Specification](https://www.khronos.org/registry/webgl/specs/latest/1.0/#5.8)
-- [WebGL Shaders and GLSL](https://webglfundamentals.org/webgl/lessons/webgl-shaders-and-glsl.html)
-- [Unbinding a WebGL buffer, worth it?](https://stackoverflow.com/questions/28259022/unbinding-a-webgl-buffer-worth-it)
-- [WebGLRenderingContext.drawArrays()](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawArrays)
-- [WebGLRenderingContext.drawElements()](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawElements)
