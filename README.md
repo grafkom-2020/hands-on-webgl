@@ -13,3 +13,6 @@
 - [Hands-on 3](https://github.com/grafkom-2020/hands-on-webgl/tree/master/hands_on-3)
     - Proses di CPU (JavaScript)
     - Proses di GPU (Shader)
+- [Hands-on 4](https://github.com/grafkom-2020/hands-on-webgl/tree/master/hands_on-4)
+    - Interaksi melalui Keyboard
+    - Interaksi melalui Mouse
